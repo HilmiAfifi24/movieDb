@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search Movies - Irok Movie DB</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        padding-top: 50px;
+        transition: background-color 0.3s ease;
+      }
+
+      .container {
+        max-width: 1200px;
+      }
+
+      .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-top: 15px;
+        color: #333;
+        transition: color 0.3s ease;
+      }
+
+      .card-title:hover {
+        color: #ff8c00;
+      }
+
+      .card img {
+        border-radius: 20px;
+        max-height: 320px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+
+      .card img:hover {
+        transform: scale(1.1);
+      }
+
+      .card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        background-color: #ff8c00;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 20px; /* Sesuaikan padding */
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+        margin-top: 10px;
+        width: 100%; /* Atur sesuai kebutuhan */
+        max-width: 300px; /* Tambahkan batas maksimum */
+        text-align: center;
+      }
+
+      .btn-primary:hover,
+      .btn-secondary:hover {
+        background-color: #f9a825;
+      }
+
+      .search-bar {
+        margin: 30px 0;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap; /* Pastikan responsif */
+      }
+
+      .footer {
+        background-color: #333;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        margin-top: 50px;
+      }
+
+      @media (max-width: 768px) {
+        .card img {
+          max-height: 200px;
+        }
+
+        .card-body {
+          padding: 15px;
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+          font-size: 0.9rem;
+          padding: 10px 15px; /* Sesuaikan padding untuk layar kecil */
+          max-width: 200px; /* Persempit lebar untuk layar kecil */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col text-center">
+          <h2 class="mb-4" style="font-weight: 600; font-size: 2rem;">Search for Your Favorite Movie</h2>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="search-input"
+              class="form-control"
+              placeholder="Enter movie title..."
+              style="max-width: 300px;"
+            />
+            <button id="search-btn" class="btn btn-primary">Search</button>
+          </div>
+        </div>
+      </div>
+      <div class="row" id="movie-results"></div>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2024 Irok Movie DB. All rights reserved.</p>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+      $('#search-btn').click(function() {
+        const query = $('#search-input').val();
+        const apiKey = '44eeab3e'; // Your OMDB API key
+        const url = `https://www.omdbapi.com/?s=${query}&apikey=${apiKey}`;
+
+        $.get(url, function(data) {
+          if (data.Response === 'True') {
+            let movies = data.Search;
+            $('#movie-results').empty();
+            movies.forEach(movie => {
+              $('#movie-results').append(`
+                <div class="col-md-4 col-sm-6 mb-4">
+                  <div class="card">
+                    <img src="${movie.Poster}" class="card-img-top" alt="${movie.Title}">
+                    <div class="card-body">
+                      <h5 class="card-title">${movie.Title}</h5>
+                      <p class="card-text">Year: ${movie.Year}</p>
+                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movieDetailsModal" onclick="showDetails('${movie.imdbID}')">Show Details</button>
+                      <a href="https://www.themoviedb.org/movie/${movie.imdbID}" target="_blank" class="btn btn-secondary">Show on Movie DB</a>
+                    </div>
+                  </div>
+                </div>
+              `);
+            });
+          } else {
+            $('#movie-results').html('<p class="text-center">No results found</p>');
+          }
+        });
+      });
+
+      function showDetails(imdbID) {
+        const apiKey = '44eeab3e'; // Your OMDB API key
+        const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
+
+        $.get(url, function(data) {
+          if (data.Response === 'True') {
+            $('#movieDetailsModal .modal-title').text(data.Title);
+            $('#movieDetailsModal .modal-body').html(`
+              <p><strong>Released:</strong> ${data.Released}</p>
+              <p><strong>Genre:</strong> ${data.Genre}</p>
+              <p><strong>Plot:</strong> ${data.Plot}</p>
+              <p><strong>Director:</strong> ${data.Director}</p>
+              <p><strong>Actors:</strong> ${data.Actors}</p>
+              <p><strong>Rating:</strong> ${data.imdbRating}</p>
+              <img src="${data.Poster}" class="img-fluid" alt="${data.Title}">
+            `);
+          }
+        });
+      }
+    </script>
+
+    <!-- Modal for Movie Details -->
+    <div class="modal fade" id="movieDetailsModal" tabindex="-1" aria-labelledby="movieDetailsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="movieDetailsModalLabel"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Movie details will be injected here -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
